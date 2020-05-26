@@ -10,12 +10,12 @@ export default class OpenWeatherApi {
   }
   getForecast(args) {
     const endpointForecast = this.baseApiUrl + '/forecast';
-    const endPointToday = `${this.baseApiUrl}/weather`;
+    const endPointOneCall = this.baseApiUrl + '/onecall';
     const params = Object.assign(
       {
         appid: this.apiKey,
         lang: this.lang,
-        units: this.unit,
+        units: this.unit
       },
       args
     );
@@ -23,38 +23,38 @@ export default class OpenWeatherApi {
     const promise = axios
       .all([
         axios.get(endpointForecast, { params }),
-        axios.get(endPointToday, { params }),
+        axios.get(endPointOneCall, { params })
       ])
       .then(
-        axios.spread((forecastReponse, todayReponse) => {
+        axios.spread((forecastReponse, oneCallResponse) => {
           const forecastData = forecastReponse.data;
-          const todayData = todayReponse.data;
-          if (forecastData && todayData) {
-            return this._map(forecastData, todayData, params.lang);
+          const oneCallData = oneCallResponse.data;
+          if (forecastData && oneCallData) {
+            return this._map(forecastData, oneCallData, params.lang);
           }
           return {};
         })
       );
     return promise;
   }
-  _map(forecastData, todayData, lang) {
+  _map(forecastData, oneCallData, lang) {
 
     const mapped = {};
 
     mapped.location = forecastData.city;
     mapped.current = {
-      description: todayData.weather[0].description,
-      icon: todayData.weather[0].icon,
+      description: oneCallData.current.weather[0].description,
+      icon: oneCallData.current.weather[0].icon,
       temperature: {
-        min: todayData.main.temp_min.toFixed(0),
-        max: todayData.main.temp_max.toFixed(0),
-        current: todayData.main.temp.toFixed(0)
+        min: oneCallData.daily[0].temp.min.toFixed(0),
+        max: oneCallData.daily[0].temp.max.toFixed(0),
+        current: oneCallData.current.temp.toFixed(0)
       },
-      wind: todayData.wind.speed.toFixed(0),
-      humidity: todayData.main.humidity,
-      date: utils.formatDate(todayData.dt, lang)
+      wind: oneCallData.current.wind_speed.toFixed(1),
+      humidity: oneCallData.current.humidity,
+      date: utils.formatDate(oneCallData.current.dt, lang)
     };
-    mapped.days = this._mapForecast(forecastData.list, lang);
+    mapped.days = this._mapForecast(oneCallData.daily, lang);
 
     return mapped;
   }
@@ -64,20 +64,22 @@ export default class OpenWeatherApi {
     var daysMapped = [];
 
     // Getting data from each day
-    for (var i=0; i<4; i++) {
+    for (var i=1; i<5; i++) {
 
-      var dayDataFiltered = daysData.filter(item => item.dt_txt.includes(comingDays[i]));  //7 or 8 data objects represnting a day
+      //var dayDataFiltered = daysData.filter(item => item.dt_txt.includes(comingDays[i]));  //7 or 8 data objects represnting a day
       var dayMapped = {};
 
-      dayMapped.date = utils.formatDate(dayDataFiltered[0].dt, lang);  // Getting the date from the 1st data object (random)
+      dayMapped.date = utils.formatDate(daysData[i].dt, lang);  // Getting the date from the 1st data object (random)
 
       dayMapped.temperature = {};
-      dayMapped.temperature.min = Math.min.apply(Math, dayDataFiltered.map(function(el) { return el.main.temp_min;})).toFixed(0);
-      dayMapped.temperature.max = Math.max.apply(Math, dayDataFiltered.map(function(el) { return el.main.temp_max;})).toFixed(0);
+      dayMapped.temperature.min = daysData[i].temp.min.toFixed(0);
+      dayMapped.temperature.max = daysData[i].temp.max.toFixed(0);
       
       // Taking the middle of the day as reference
-      dayMapped.description = dayDataFiltered[dayDataFiltered.length/2].weather[0].description;
-      dayMapped.icon = dayDataFiltered[dayDataFiltered.length/2].weather[0].icon;
+      dayMapped.description = daysData[i].weather[0].description;
+      dayMapped.icon = daysData[i].weather[0].icon;
+      dayMapped.uvi = daysData[i].uvi;
+      dayMapped.wind = daysData[i].wind_speed.toFixed(0);
 
       daysMapped.push(dayMapped);
     }

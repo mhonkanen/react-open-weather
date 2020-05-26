@@ -8,7 +8,8 @@
     "axios": "^0.18.1",
     "moment": "^2.18.1",
     "react": "~15.4.1",
-    "react-dom": "~15.4.1"
+    "react-dom": "~15.4.1",
+    "scss": "^0.2.4"
   },
   "devDependencies": {
     "autoprefixer-loader": "^3.2.0",
@@ -42,7 +43,7 @@
     "mocha": "^3.2.0",
     "mockdate": "^2.0.2",
     "moxios": "^0.4.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.14.1",
     "react-addons-test-utils": "^15.5.1",
     "react-hot-loader": "~3.0.0-beta.6",
     "sass-loader": "~4.0.2",
@@ -60,12 +61,12 @@
     "lint": "./node_modules/.bin/eslint ./src/js ;exit 0",
     "coverage": "node_modules/.bin/babel-node node_modules/.bin/babel-istanbul cover node_modules/.bin/_mocha"
   },
-  "repostitory": {
+  "repository": {
     "type": "git",
-    "url": "https://github.com/farahat80/react-open-weather.git"
+    "url": "https://github.com/mhonkanen/react-open-weather.git"
   },
   "bugs": {
-    "url": "https://github.com/farahat80/react-open-weather/issues"
+    "url": "https://github.com/mhonkanen/react-open-weather/issues"
   },
   "keywords": [
     "react",
