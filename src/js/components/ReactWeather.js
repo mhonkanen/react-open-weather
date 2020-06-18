@@ -25,6 +25,8 @@ const defaultProps = {
 };
 
 class ReactWeather extends React.Component {
+  _isMounted = false;
+
   constructor(props) {
     super(props);
     this.api = new OpenWeatherApi(props.unit, props.apikey, props.lang);
@@ -62,17 +64,26 @@ class ReactWeather extends React.Component {
     return <div>Loading...</div>;
   }
   componentDidMount() {
+    _isMounted = true;
     this.getForecastData();
   }
+
+  componentWillUnmount() {
+    _isMounted = false;
+  }
+
   getForecastData() {
     const self = this;
     const params = self._getParams();
     let promise = null;
     promise = self.api.getForecast(params);
     promise.then(data => {
-      self.setState({
-        data,
-      });
+      // Guard against setting state in unmounted component.
+      if (_isMounted) {
+        self.setState({
+          data,
+        });
+      }
     });
   }
   _getParams() {
